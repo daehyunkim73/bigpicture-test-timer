@@ -8,7 +8,7 @@
  *    - Adds/changes clock theme
  *    - Changes some public methods
  */
-'use strict'; 
+'use strict';  
 function Timepicker(isClk,is24H,isLight,hour,minute){
 	isClk=!!isClk;
 	// is24H=!!is24H;
