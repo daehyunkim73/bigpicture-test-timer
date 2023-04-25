@@ -87,7 +87,7 @@ function Timepicker(isClk,is24H,isLight,hour,minute){
 					onPtrMove(touch.pageX,touch.pageY);
 					break
 				}
-			} 
+			}  
 		}
 	},
 	onTouchEnd=function(e){
