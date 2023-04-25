@@ -136,7 +136,7 @@ function Timepicker(isClk,is24H,isLight,hour,minute){
 					lastHourDeg=lastHourDeg+(deg-lastMinuteDeg)/12;
 					if(lastHourDeg<0)lastHourDeg+=360;
 					lastHourDeg%=360
-				}
+				} 
 				lastMinuteDeg=deg;
 				rotateElm(hourHand,lastHourDeg)
 			}
