@@ -1,0 +1,353 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<title>Analog Clock Timepicker Demo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="ZulNs">
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="robots" content="all">
+<meta name="copyright" content="ZulNs">
+
+</head>
+<body>
+<style type="text/css">
+svg{stroke:currentColor;fill:currentColor;stroke-width:1}
+.w3-bar-item{border-left:6px solid transparent!important}
+.w3-bar-item:not(:disabled):hover{border-color:#f44336!important}
+.w3-bar-item:focus{border-color:#2196F3!important}
+.w3-bar-item.expanded{color:#fff;background-color:#616161}
+button.collapsed + div,button.collapsed>:nth-child(3),button.expanded>:nth-child(2){display:none!important}
+.w3-bar-item input[type=radio],.w3-bar-item label{cursor:pointer}
+.w3-button{background-color:transparent}
+.w3-bar-item:focus-within{border-color:#2196F3!important}
+</style>
+
+<div class="w3-main" style="margin-left:220px">
+	<div id="timepicker" style="float:left" class="w3-container w3-margin-top w3-padding-16 w3-color">
+	</div>
+	<div style="float:left; margin-top: -50px; margin-left: 30px;">
+		<div style="float:left; margin-top: 55px; margin-left: 30px;">
+			<div style="text-align:left; margin-top: 55px; margin-left: 30px; width: 30px; background-color: silver; text-align: center; cursor: pointer;" onclick="fn_hour_v_up();">^</div>
+			<div style="text-align:left; margin-top: 55px; margin-left: 30px; width: 30px; background-color: silver; text-align: center; cursor: pointer;" onclick="fn_min_v_up();">^</div>
+			<div style="text-align:left; margin-top: 55px; margin-left: 30px; width: 30px; background-color: silver; text-align: center;"></div>
+		</div>
+		<div style="float:left; margin-top: 55px; margin-left: 30px;">
+			<div style="text-align:left; margin-top: 55px; margin-left: 30px; width: 30px; background-color: silver; text-align: center;" id="hour_v">00</div>&nbsp;&nbsp;&nbsp;Hour
+			<div style="text-align:left; margin-top: 55px; margin-left: 30px; width: 30px; background-color: silver; text-align: center;" id="min_v">00</div>&nbsp;&nbsp;&nbsp;Minute
+			<div style="text-align:left; margin-top: 55px; margin-left: 30px; width: 30px; background-color: silver; text-align: center;" id="ampm_v">PM</div>&nbsp;&nbsp;&nbsp;AM/PM
+		</div>
+		<div style="float:left; margin-top: 55px; margin-left: 30px;">
+			<div style="text-align:left; margin-top: 55px; margin-left: 30px; width: 30px; background-color: silver; text-align: center; cursor: pointer;" onclick="fn_hour_v_down();">v</div>
+			<div style="text-align:left; margin-top: 55px; margin-left: 30px; width: 30px; background-color: silver; text-align: center; cursor: pointer;" onclick="fn_min_v_down();">v</div>
+			<div style="text-align:left; margin-top: 55px; margin-left: 30px; width: 30px; background-color: silver; text-align: center;"></div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" src="timepicker.js"></script>
+<script type="text/javascript">
+'use strict';
+const picker=new Timepicker();
+const container=document.getElementById('timepicker');
+const pickerElm=picker.getElement();
+pickerElm.style.marginLeft='calc(0% - 200px)';
+pickerElm.style.marginTop='12px';
+pickerElm.style.display='none';
+container.appendChild(pickerElm);
+picker.setClockMode(false);
+picker.show();
+
+
+
+picker.onPicked=function(){
+	const timeStr=document.getElementById('timeString');
+	// timeStr.value=picker.getTimeString();
+	// timeStr.focus()
+};
+
+function pickTime(ev){
+
+}
+
+function setClkTheme(){
+	// Create clock surface
+	const hour = getHour();
+	// alert('hour : '+ hour)
+	let isLight=false;
+	let self=this,
+	tpick=document.createElement('div'),
+	clkFace=document.createElement('canvas'),
+	hourHand=document.createElement('canvas'),
+	minuteHand=document.createElement('canvas'),
+	secondHand=document.createElement('canvas'),
+	timeStr=document.createElement('div'),
+	pickBtn=document.createElement('button'),
+	isHidden=true,
+	isPM=parseInt(hour)>=12,
+	isHourHand,
+	isReverseRotate,
+	isDragging=false,
+	isFiredByMouse=false,
+	touchId,
+	lastHourDeg,
+	lastMinuteDeg,
+	centerX,
+	centerY,
+	cssTransform=Timepicker.getSupportedTransformProp(),
+	timerId,
+	second=Timepicker.getSeconds();
+
+	let ctx=clkFace.getContext('2d');
+	ctx.strokeStyle=isLight?'#000':'#fff';
+	ctx.beginPath();
+	ctx.arc(120,120,119,0,2*Math.PI);
+	ctx.stroke();
+	let radGrd=ctx.createRadialGradient(120,120,1,120,120,120);
+	// radGrd.addColorStop(0,isLight?'#e7e7e7':'#000');
+	// radGrd.addColorStop(1,isLight?'#fff':'#171717');
+
+	if(isPM){
+		// PM
+		radGrd.addColorStop(0,'black');
+		radGrd.addColorStop(1,'black');		
+	}else{
+		// AM
+		radGrd.addColorStop(0,'white');
+		radGrd.addColorStop(1,'black');
+	}
+
+	ctx.fillStyle=radGrd;
+	ctx.beginPath();
+	ctx.arc(120,120,118,0,2*Math.PI);
+	ctx.fill();
+	ctx.translate(120,120);
+	ctx.fillStyle=isLight?'#000':'#fff';
+	for(let i=0;i<12;i++){
+		ctx.beginPath();
+		ctx.arc(0,-110,2,0,2*Math.PI);
+		ctx.fill();
+		ctx.rotate(Math.PI/30);
+		for(let j=0;j<4;j++){
+			ctx.beginPath();
+			ctx.arc(0,-110,1,0,2*Math.PI);
+			ctx.fill();
+			ctx.rotate(Math.PI/30);
+		}
+	}
+	ctx.font='18px Verdana';
+	ctx.textAlign='center';
+	ctx.textBaseline='middle';
+	for(let i=1;i <= 12;i++){
+		ctx.fillText(i,94*Math.sin(i*Math.PI/6),-94*Math.cos(i*Math.PI/6));
+	}
+	ctx.translate(-120,-120);
+	// Create hour hand
+	ctx=hourHand.getContext('2d');
+	ctx.fillStyle=isLight?'#000':'#2196F3';
+	ctx.beginPath();
+	ctx.moveTo(10,0);
+	ctx.lineTo(0,90);
+	ctx.lineTo(20,90);
+	ctx.lineTo(10,0);
+	ctx.fill();
+	// Create minute hand
+	ctx=minuteHand.getContext('2d');
+	ctx.fillStyle=isLight?'#7f7f7f':'#ffeb3b';
+	ctx.beginPath();
+	ctx.moveTo(6,0);
+	ctx.lineTo(0,110);
+	ctx.lineTo(12,110);
+	ctx.lineTo(6,0);
+	ctx.fill();
+	ctx.fillStyle='#000';
+	ctx.beginPath();
+	ctx.arc(6,90,2,0,2*Math.PI);
+	ctx.fill();
+	// Create second hand
+	ctx=secondHand.getContext('2d');
+	ctx.fillStyle='#f44336';
+	ctx.beginPath();
+	ctx.moveTo(4,0);
+	ctx.lineTo(0,120);
+	ctx.lineTo(8,120);
+	ctx.lineTo(4,0);
+	ctx.fill();
+	ctx.fillStyle='#000';
+	ctx.beginPath();
+	ctx.arc(4,90,2,0,2*Math.PI);
+	ctx.fill()
+};
+
+function getHour(){
+	let upd_hour_v;
+	const hour_v = document.getElementById("hour_v");
+	// hour_v.innerText = (('0'+(is24H?hour:hour%12==0?12:hour%12)).slice(-2));
+	if(parseInt(hour_v.innerText)+1 >= 24){
+		upd_hour_v = 24;
+	}else{
+		upd_hour_v = parseInt(hour_v.innerText)+1;
+	}
+	let upd_hour_v_final;
+	if(upd_hour_v.toString().length <= 1){
+		upd_hour_v_final = '0'.concat(upd_hour_v.toString())
+	}else{
+		upd_hour_v_final = ''.concat(upd_hour_v.toString())
+	}
+	const hour_v_ele = document.getElementById("hour_v");
+	(upd_hour_v_final).slice(-2);
+	return (upd_hour_v_final).slice(-2);
+}
+
+function fn_hour_v_up(){
+	let upd_hour_v;
+	const hour_v = document.getElementById("hour_v");
+	// hour_v.innerText = (('0'+(is24H?hour:hour%12==0?12:hour%12)).slice(-2));
+	if(parseInt(hour_v.innerText)+1 < 23){
+		upd_hour_v = parseInt(hour_v.innerText)+1;
+	}else{
+		upd_hour_v = 0;
+	}
+	let upd_hour_v_final;
+	if(upd_hour_v.toString().length <= 1){
+		upd_hour_v_final = '0'.concat(upd_hour_v.toString())
+	}else{
+		upd_hour_v_final = ''.concat(upd_hour_v.toString())
+	}
+	const hour_v_ele = document.getElementById("hour_v");
+	hour_v_ele.innerText = (upd_hour_v_final).slice(-2);
+
+	if(hour_v_ele.innerText!='')picker.setHours(hour_v_ele.innerText);
+	picker.setClkThemeChange();
+
+	const ampm_v_ele = document.getElementById("ampm_v");
+	if(parseInt(hour_v_ele.innerText) < 12){
+		ampm_v_ele.innerText = 'AM';
+	}else{
+		ampm_v_ele.innerText = 'PM';
+	}
+};
+
+function fn_hour_v_down(){
+	let upd_hour_v;
+	const hour_v = document.getElementById("hour_v");
+	// hour_v.innerText = (('0'+(is24H?hour:hour%12==0?12:hour%12)).slice(-2));
+	if(parseInt(hour_v.innerText)-1 <= 0){
+		upd_hour_v = 0;
+	}else{
+		upd_hour_v = parseInt(hour_v.innerText)-1;
+	}
+	let upd_hour_v_final;
+	if(upd_hour_v.toString().length <= 1){
+		upd_hour_v_final = '0'.concat(upd_hour_v.toString())
+	}else{
+		upd_hour_v_final = ''.concat(upd_hour_v.toString())
+	}
+	const hour_v_ele = document.getElementById("hour_v");
+	hour_v_ele.innerText = (upd_hour_v_final).slice(-2);
+
+	if(hour_v_ele.innerText!='')picker.setHours(hour_v_ele.innerText);
+	picker.setClkThemeChange();
+
+	const ampm_v_ele = document.getElementById("ampm_v");
+	if(parseInt(hour_v_ele.innerText) < 12){
+		ampm_v_ele.innerText = 'AM';
+	}else{
+		ampm_v_ele.innerText = 'PM';
+	}
+};
+
+function fn_min_v_up(){
+	let upd_min_v;
+	const min_v = document.getElementById("min_v");
+	if(parseInt(min_v.innerText)+1 > 59){
+		upd_min_v = 0;
+	}else{
+		upd_min_v = parseInt(min_v.innerText)+1;
+	}
+	let upd_min_v_final;
+	if(upd_min_v.toString().length <= 1){
+		upd_min_v_final = '0'.concat(upd_min_v.toString())
+	}else{
+		upd_min_v_final = ''.concat(upd_min_v.toString())
+	}
+	const min_v_ele = document.getElementById("min_v");
+	min_v_ele.innerText = (upd_min_v_final).slice(-2);
+
+	if(min_v_ele.innerText!='')picker.setMinutes(min_v_ele.innerText);
+};
+
+function fn_min_v_down(){
+	let upd_min_v;
+	const min_v = document.getElementById("min_v");
+	if(parseInt(min_v.innerText)-1 > 0){
+		upd_min_v = parseInt(min_v.innerText)-1;
+	}else{
+		upd_min_v = 0;
+	}
+	let upd_min_v_final;
+	if(upd_min_v.toString().length <= 1){
+		upd_min_v_final = '0'.concat(upd_min_v.toString())
+	}else{
+		upd_min_v_final = ''.concat(upd_min_v.toString())
+	}
+	const min_v_ele = document.getElementById("min_v");
+	min_v_ele.innerText = (upd_min_v_final).slice(-2);
+
+	if(min_v_ele.innerText!='')picker.setMinutes(min_v_ele.innerText);
+};
+
+function setClockMode(el){
+	el.children[0].checked=true;
+	picker.setClockMode(el.children[0].value=='true')
+}
+
+function set24Hour(el){
+	el.children[0].checked=true;
+	picker.set24Hour(el.children[0].value=='true')
+}
+
+function setLightTheme(el){
+	el.children[0].checked=true;
+	picker.setLightTheme(el.children[0].value=='true')
+}
+
+function setVisibility(el){
+	// el.children[0].checked=true;
+	el.children[0].value=='show'?picker.show():picker.hide()
+}
+
+function setTime(){
+	let h=document.getElementById('valHour').value;
+	let m=document.getElementById('valMinute').value;
+	if(h!='')picker.setHours(h);
+	if(m!='')picker.setMinutes(m)
+}
+
+function setBackground(c){
+	let s=container.className;
+	s=s.substr(0,s.lastIndexOf('w3')+3)+c;
+	container.className=s
+}
+
+function openSidebar(){
+	document.getElementById("mySidebar").style.display = "block"
+}
+
+function closeSidebar(){
+	document.getElementById("mySidebar").style.display = "none"
+}
+
+function dropdown(el){
+	if(el.className.indexOf('expanded')==-1){
+		el.className=el.className.replace('collapsed','expanded');
+	}else{
+		el.className=el.className.replace('expanded','collapsed')
+	}
+}
+
+
+</script>
+</body>
+</html>
