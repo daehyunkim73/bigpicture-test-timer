@@ -18,7 +18,7 @@ function Timepicker(isClk,is24H,isLight,hour,minute){
 	// hour=hour==undefined?Timepicker.getHours():hour;
 	minute=minute==undefined?Timepicker.getMinutes():~~minute%60;
 	let self=this,
-		tpick=document.createElement('div'),
+		tpick=document.createElement('div'), 
 		clkFace=document.createElement('canvas'),
 		hourHand=document.createElement('canvas'),
 		minuteHand=document.createElement('canvas'),
